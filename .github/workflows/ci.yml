@@ -24,4 +24,4 @@ jobs:
         run: python -m pytest -q
         
       - name: Build Docker image
-        run: docket build -t platform-demo:${{github.sha}} .
+        run: docker build -t platform-demo:${{github.sha}} .

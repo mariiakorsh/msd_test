@@ -13,7 +13,7 @@ provider "google" {
 }
 
 resource "google_service_account" "demo" {
-  account_id = "platform-demo-sa"
+  account_id   = "platform-demo-sa"
   display_name = "Custom SA for VM instance"
 }
 
@@ -43,17 +43,17 @@ resource "google_compute_firewall" "http" {
 }
 
 resource "google_compute_instance" "demo" {
-  name = "platform-demo-vm"
+  name         = "platform-demo-vm"
   machine_type = "e2-micro"
-  zone = "us-west1-a"
+  zone         = "us-west1-a"
 
   tags = ["platform-demo"]
 
   boot_disk {
     initialize_params {
       image = "debian-cloud/debian-12"
-      type = "pd-standard"
-      size = 10
+      type  = "pd-standard"
+      size  = 10
     }
   }
 
@@ -63,7 +63,7 @@ resource "google_compute_instance" "demo" {
   }
 
   service_account {
-    email = google_service_account.demo.email
+    email  = google_service_account.demo.email
     scopes = ["cloud-platform"]
   }
 }

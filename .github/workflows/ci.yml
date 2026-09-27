@@ -25,3 +25,29 @@ jobs:
         
       - name: Build Docker image
         run: docker build -t platform-demo:${{github.sha}} .
+
+  publish:
+    needs: test-and-build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        run: |
+          IMAGE = ghcr.io/${{ github.repository }}/platform-demo:${{ github.sha }}
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"

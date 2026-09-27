@@ -72,6 +72,17 @@ resource "google_compute_instance" "demo" {
   }
 }
 
+resource "google_compute_firewall" "iap_ssh" {
+  name = "platform-demo-allow-iap-ssh"
+  network = google_compute_network.demo.name
+  source_ranges = ["35.235.240.0/20"]
+
+  allow {
+    protocol = "tcp"
+    ports = ["22"]
+  }
+}
+
 output "server_public_ip" {
   value = google_compute_instance.demo.network_interface[0].access_config[0].nat_ip
 }

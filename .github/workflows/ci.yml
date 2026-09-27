@@ -48,6 +48,6 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          IMAGE = ghcr.io/${{ github.repository }}/platform-demo:${{ github.sha }}
+          IMAGE=ghcr.io/${{ github.repository }}/platform-demo:${{ github.sha }}
           docker build -t "$IMAGE" .
           docker push "$IMAGE"

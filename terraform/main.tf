@@ -66,4 +66,12 @@ resource "google_compute_instance" "demo" {
     email  = google_service_account.demo.email
     scopes = ["cloud-platform"]
   }
+
+  metadata = {
+    "startup-script" = file("${path.module}/startup.sh")
+  }
+}
+
+output "server_public_ip" {
+  value = google_compute_instance.demo.network_interface[0].access_config[0].nat_ip
 }

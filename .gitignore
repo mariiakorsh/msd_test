@@ -2,3 +2,7 @@
 __pycache__/
 .pytest_cache/
 .envrc
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars

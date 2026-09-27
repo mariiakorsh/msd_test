@@ -51,3 +51,31 @@ jobs:
           IMAGE=ghcr.io/${{ github.repository }}/platform-demo:${{ github.sha }}
           docker build -t "$IMAGE" .
           docker push "$IMAGE"
+
+  auth-check:
+    needs: publish
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Authenticate with OIDC to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: projects/265291172370/locations/global/workloadIdentityPools/github-actions/providers/github
+          service_account: platform-demo-deployer@msd-test-assignment.iam.gserviceaccount.com
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v3
+        with:
+          project_id: msd-test-assignment
+
+      - name: Verify authentication
+        run: |
+          gcloud auth print-access-token >/dev/null
+          echo "Google Cloud authentication succeeded"

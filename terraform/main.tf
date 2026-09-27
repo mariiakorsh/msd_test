@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     google = {
-      source = "hashicorp/google"
+      source  = "hashicorp/google"
       version = ">=8.0, < 9.0"
     }
   }
@@ -13,13 +13,26 @@ provider "google" {
 }
 
 resource "google_compute_network" "demo" {
-  name = "platform-demo-vpc"
+  name                    = "platform-demo-vpc"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "demo" {
-  name = "platform-demo-subnet"
-  region = "us-west1"
+  name          = "platform-demo-subnet"
+  region        = "us-west1"
   ip_cidr_range = "10.42.0.0/24"
-  network = google_compute_network.demo.id
+  network       = google_compute_network.demo.id
+}
+
+resource "google_compute_firewall" "http" {
+  name          = "platform-demo-allow-http"
+  network       = google_compute_network.demo.name
+  source_ranges = ["0.0.0.0/0"]
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80"]
+  }
+
+  target_tags = ["platform-demo"]
 }

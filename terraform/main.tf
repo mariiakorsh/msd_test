@@ -11,3 +11,15 @@ provider "google" {
   project = "msd-test-assignment"
   region  = "us-west1"
 }
+
+resource "google_compute_network" "demo" {
+  name = "platform-demo-vpc"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "demo" {
+  name = "platform-demo-subnet"
+  region = "us-west1"
+  ip_cidr_range = "10.42.0.0/24"
+  network = google_compute_network.demo.id
+}

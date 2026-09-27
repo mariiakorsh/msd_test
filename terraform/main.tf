@@ -8,6 +8,11 @@ terraform {
 }
 
 provider "google" {
+  project = local.project
+  region  = local.region
+}
+
+locals {
   project = "msd-test-assignment"
   region  = "us-west1"
 }
@@ -24,7 +29,7 @@ resource "google_compute_network" "demo" {
 
 resource "google_compute_subnetwork" "demo" {
   name          = "platform-demo-subnet"
-  region        = "us-west1"
+  region        = local.region
   ip_cidr_range = "10.42.0.0/24"
   network       = google_compute_network.demo.id
 }
@@ -73,14 +78,22 @@ resource "google_compute_instance" "demo" {
 }
 
 resource "google_compute_firewall" "iap_ssh" {
-  name = "platform-demo-allow-iap-ssh"
-  network = google_compute_network.demo.name
+  name          = "platform-demo-allow-iap-ssh"
+  network       = google_compute_network.demo.name
   source_ranges = ["35.235.240.0/20"]
 
   allow {
     protocol = "tcp"
-    ports = ["22"]
+    ports    = ["22"]
   }
+
+  target_tags = ["platform-demo"]
+}
+
+resource "google_project_iam_member" "vm_log_writer" {
+  project = local.project
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${google_service_account.demo.email}"
 }
 
 output "server_public_ip" {

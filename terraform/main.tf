@@ -96,6 +96,46 @@ resource "google_project_iam_member" "vm_log_writer" {
   member  = "serviceAccount:${google_service_account.demo.email}"
 }
 
+resource "google_service_account" "deployer" {
+  account_id   = "platform-demo-deployer"
+  display_name = "GitHub Actions platform demo deployer"
+}
+
+resource "google_iam_workload_identity_pool" "github" {
+  workload_identity_pool_id = "github-actions"
+  project                   = local.project
+  display_name              = "GitHub Actions"
+}
+
+resource "google_iam_workload_identity_pool_provider" "github" {
+  project                            = local.project
+  workload_identity_pool_id          = google_iam_workload_identity_pool.github.workload_identity_pool_id
+  workload_identity_pool_provider_id = "github"
+  display_name                       = "GitHub Actions provider"
+
+  attribute_mapping = {
+    "google.subject"       = "assertion.sub"
+    "attribute.repository" = "assertion.repository"
+  }
+
+  attribute_condition = <<-EOT
+    assertion.repository_owner_id == "123419107" &&
+    assertion.repository == "mariiakorsh/msd_test" &&
+    assertion.ref == "refs/heads/main"
+  EOT
+
+  oidc {
+    issuer_uri = "https://token.actions.githubusercontent.com"
+  }
+}
+
+resource "google_service_account_iam_member" "github_deployer" {
+  service_account_id = google_service_account.deployer.name
+  role               = "roles/iam.workloadIdentityUser"
+
+  member = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository/mariiakorsh/msd_test"
+}
+
 output "server_public_ip" {
   value = google_compute_instance.demo.network_interface[0].access_config[0].nat_ip
 }
